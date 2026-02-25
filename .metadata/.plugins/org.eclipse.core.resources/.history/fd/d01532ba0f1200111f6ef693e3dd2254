@@ -1,0 +1,32 @@
+package com.example.weather.util;
+
+import com.example.weather.repository.WeatherRepository;
+import com.example.weather.service.WeatherService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class DataImportRunner implements CommandLineRunner {
+
+    private final WeatherService weatherService;
+    private final WeatherRepository repository;
+
+    @Override
+    public void run(String... args) {
+
+        if (repository.count() == 0) {
+
+            log.info("Database empty. Importing CSV...");
+
+            String filePath = "src/main/resources/testset.csv";
+
+            weatherService.importCsvData(filePath);
+
+            log.info("Import finished");
+        }
+    }
+}

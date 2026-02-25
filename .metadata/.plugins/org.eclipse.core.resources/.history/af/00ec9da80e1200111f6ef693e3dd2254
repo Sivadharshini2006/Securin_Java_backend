@@ -1,0 +1,16 @@
+package com.example.weather.service;
+
+
+
+import com.example.weather.dto.MonthlyStatsDTO;
+import com.example.weather.entity.WeatherRecord;
+import java.util.List;
+
+public interface WeatherService {
+    // API Methods
+    List<WeatherRecord> getWeatherData(Integer month, Integer day);
+    List<MonthlyStatsDTO> getTemperatureAnalytics(int year);
+    
+    // Ingestion Method
+    void importCsvData(String filePath);
+}

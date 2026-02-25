@@ -1,0 +1,116 @@
+package com.example.weather.service.impl;
+
+
+
+import com.opencsv.CSVReader;
+import com.example.weather.dto.MonthlyStatsDTO;
+import com.example.weather.entity.WeatherRecord;
+import com.example.weather.repository.WeatherRepository;
+import com.example.weather.service.WeatherService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.io.FileReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class WeatherServiceImpl implements WeatherService {
+
+    private final WeatherRepository repository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HH:mm");
+
+    /**
+     * Objective 1: Data Processing and Storage
+     * Transforms CSV into MongoDB structured format.
+     */
+    @Override
+    public void importCsvData(String filePath) {
+        log.info("Starting CSV Ingestion...");
+        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+            List<WeatherRecord> batch = new ArrayList<>();
+            String[] nextLine;
+            reader.readNext(); // Skip header row
+
+            while ((nextLine = reader.readNext()) != null) {
+                try {
+                    WeatherRecord record = new WeatherRecord();
+                    // Mapping columns based on testset.csv
+                    record.setTimestamp(LocalDateTime.parse(nextLine[0].trim(), formatter));
+                    record.setCondition(nextLine[1].trim());
+                    record.setHeatIndex(parseSafe(nextLine[5]));
+                    record.setHumidity(parseSafe(nextLine[6]));
+                    
+                    // Handle -9999 pressure values found in data
+                    Double pressure = parseSafe(nextLine[8]);
+                    record.setPressure(pressure != null && pressure == -9999.0 ? null : pressure);
+                    
+                    record.setTemperature(parseSafe(nextLine[11]));
+
+                    batch.add(record);
+                    if (batch.size() >= 1000) {
+                        repository.saveAll(batch);
+                        batch.clear();
+                    }
+                } catch (Exception e) {
+                    log.warn("Skipping malformed row: {}", (Object) nextLine);
+                }
+            }
+            if (!batch.isEmpty()) repository.saveAll(batch);
+            log.info("CSV Ingestion Complete.");
+        } catch (Exception e) {
+            log.error("Critical error during CSV import: ", e);
+        }
+    }
+
+    /**
+     * Objective 2: API Retrieval with Filtering
+     */
+    @Override
+    public List<WeatherRecord> getWeatherData(Integer month, Integer day) {
+        return repository.findAll().stream()
+                .filter(r -> (month == null || r.getTimestamp().getMonthValue() == month))
+                .filter(r -> (day == null || r.getTimestamp().getDayOfMonth() == day))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Objective 3: Analytics (High, Low, Median)
+     */
+    @Override
+    public List<MonthlyStatsDTO> getTemperatureAnalytics(int year) {
+        List<WeatherRecord> yearData = repository.findAll().stream()
+                .filter(r -> r.getTimestamp().getYear() == year)
+                .collect(Collectors.toList());
+
+        Map<Integer, List<Double>> groupedByMonth = yearData.stream()
+                .filter(r -> r.getTemperature() != null)
+                .collect(Collectors.groupingBy(r -> r.getTimestamp().getMonthValue(),
+                        Collectors.mapping(WeatherRecord::getTemperature, Collectors.toList())));
+
+        List<MonthlyStatsDTO> statsList = new ArrayList<>();
+        groupedByMonth.forEach((month, temps) -> {
+            Collections.sort(temps);
+            double median = (temps.size() % 2 == 0) ? 
+                (temps.get(temps.size()/2) + temps.get(temps.size()/2 - 1)) / 2 : 
+                temps.get(temps.size()/2);
+
+            statsList.add(MonthlyStatsDTO.builder()
+                    .monthName(java.time.Month.of(month).name())
+                    .maxTemp(Collections.max(temps))
+                    .minTemp(Collections.min(temps))
+                    .medianTemp(median)
+                    .build());
+        });
+        return statsList;
+    }
+
+    private Double parseSafe(String val) {
+        return (val == null || val.trim().isEmpty() || val.equalsIgnoreCase("NaN")) ? null : Double.parseDouble(val.trim());
+    }
+}

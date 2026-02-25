@@ -16,7 +16,6 @@ public class DataImportRunner implements CommandLineRunner {
     private final WeatherService weatherService;
     private final WeatherRepository repository;
 
-    // ✅ Manual constructor (VERY IMPORTANT)
     public DataImportRunner(WeatherService weatherService,
                             WeatherRepository repository) {
         this.weatherService = weatherService;

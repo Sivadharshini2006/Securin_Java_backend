@@ -1,0 +1,44 @@
+package com.example.weather.util;
+
+
+
+import com.example.weather.repository.WeatherRepository;
+import com.example.weather.service.WeatherService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class DataImportRunner implements CommandLineRunner {
+
+    private final WeatherService weatherService;
+    private final WeatherRepository repository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        // Industry Check: Only import if the database is empty to avoid duplicates
+        if (repository.count() == 0) {
+            log.info("Database is empty. Starting initial CSV data migration...");
+            
+            // Path to your resources folder
+            String filePath = "src/main/resources/testset.csv";
+            
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                weatherService.processAndStoreCsv(filePath);
+                log.info("Migration successful. System is ready.");
+            } else {
+                log.error("Critical Error: CSV file not found at path: {}", filePath);
+            }
+        } else {
+            log.info("Database already contains data. Skipping CSV migration.");
+        }
+    }
+}

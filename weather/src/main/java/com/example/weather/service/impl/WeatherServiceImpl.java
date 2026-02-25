@@ -24,7 +24,7 @@ public class WeatherServiceImpl implements WeatherService {
 
     private final WeatherRepository repository;
 
-    // ✅ Manual constructor (VERY IMPORTANT)
+   
     public WeatherServiceImpl(WeatherRepository repository) {
         this.repository = repository;
     }
