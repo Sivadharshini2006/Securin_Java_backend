@@ -1,0 +1,56 @@
+package com.example.weather.entity;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
+
+@Document(collection = "weather_data")
+public class WeatherRecord {
+
+    @Id
+    private String id;
+
+    private LocalDateTime timestamp;   // 🔥 renamed from datetime
+
+    private String condition;
+    private Double temperature;
+    private Double humidity;
+    private Double pressure;
+    private Double heatIndex;
+
+    public WeatherRecord() {}
+
+    public WeatherRecord(String id, LocalDateTime timestamp, String condition,
+                         Double temperature, Double humidity,
+                         Double pressure, Double heatIndex) {
+        this.id = id;
+        this.timestamp = timestamp;
+        this.condition = condition;
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.pressure = pressure;
+        this.heatIndex = heatIndex;
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+    public String getCondition() { return condition; }
+    public void setCondition(String condition) { this.condition = condition; }
+
+    public Double getTemperature() { return temperature; }
+    public void setTemperature(Double temperature) { this.temperature = temperature; }
+
+    public Double getHumidity() { return humidity; }
+    public void setHumidity(Double humidity) { this.humidity = humidity; }
+
+    public Double getPressure() { return pressure; }
+    public void setPressure(Double pressure) { this.pressure = pressure; }
+
+    public Double getHeatIndex() { return heatIndex; }
+    public void setHeatIndex(Double heatIndex) { this.heatIndex = heatIndex; }
+}

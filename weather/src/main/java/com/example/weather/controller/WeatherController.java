@@ -1,0 +1,44 @@
+package com.example.weather.controller;
+
+import com.example.weather.dto.MonthlyStatsDTO;
+import com.example.weather.entity.WeatherRecord;
+import com.example.weather.service.WeatherService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/weather")
+@RequiredArgsConstructor
+@Slf4j
+public class WeatherController {
+
+	 private final WeatherService service;
+
+	    public WeatherController(WeatherService service) {
+	        this.service = service;
+	    }
+	
+    @GetMapping("/search")
+    public ResponseEntity<List<WeatherRecord>> search(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer day) {
+
+        return ResponseEntity.ok(
+                service.getWeatherData(year, month, day)
+        );
+    }
+
+    @GetMapping("/stats/{year}")
+    public ResponseEntity<List<MonthlyStatsDTO>> stats(
+            @PathVariable int year) {
+
+        return ResponseEntity.ok(
+                service.getTemperatureAnalytics(year)
+        );
+    }
+}
