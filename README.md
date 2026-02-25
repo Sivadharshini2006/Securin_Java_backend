@@ -1,4 +1,4 @@
-<img width="884" height="852" alt="image" src="https://github.com/user-attachments/assets/bb8e2dfb-d2a7-48b3-89e9-9e06789a224a" />
+
 **🌦 Weather Data Analytics API**
 
 A Spring Boot REST API that imports weather data from a CSV file into MongoDB and provides powerful filtering and analytics features such as monthly temperature statistics.
@@ -86,6 +86,7 @@ GET http://localhost:8080/api/weather/search?year=2023&month=1&day=15
 <img width="953" height="996" alt="image" src="https://github.com/user-attachments/assets/c512dfea-2cbb-4b55-90f1-b6ba61ea359d" />
 <img width="848" height="880" alt="image" src="https://github.com/user-attachments/assets/020b7aa1-c330-4f63-a0d3-022c693b3af0" />
 <img width="356" height="746" alt="image" src="https://github.com/user-attachments/assets/faf48b93-ef1a-45fe-bffc-6d3a2894f50a" />
+<img width="884" height="852" alt="image" src="https://github.com/user-attachments/assets/bb8e2dfb-d2a7-48b3-89e9-9e06789a224a" />
 
 **📊 Key Concepts Demonstrated**
 
